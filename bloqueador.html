@@ -1,0 +1,316 @@
+<html><head><base href="https://localhost:8080/" target="_blank">
+<meta charset="UTF-8">
+<title>Bloqueador Universal de Notificações</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --primary: #1a237e;
+  --secondary: #c62828;
+  --background: #f5f5f5;
+  --text: #333;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: var(--background);
+  color: var(--text);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.schedule-container {
+  margin-top: 20px;
+}
+
+.time-input {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.time-input input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-active {
+  background-color: #4CAF50;
+}
+
+.status-inactive {
+  background-color: #f44336;
+}
+
+.app-list {
+  margin-top: 20px;
+}
+
+.app-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.app-icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 15px;
+  border-radius: 8px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.blocking-active {
+  animation: pulse 2s infinite;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Bloqueador Universal de Notificações</h1>
+    <p>Controle total sobre suas notificações</p>
+  </div>
+
+  <div class="card">
+    <h2>Status do Bloqueador</h2>
+    <div class="toggle-container">
+      <span>Bloqueio Master</span>
+      <label class="toggle">
+        <input type="checkbox" id="masterToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Configurações de Bloqueio</h2>
+    
+    <div class="toggle-container">
+      <span>Chamadas</span>
+      <label class="toggle">
+        <input type="checkbox" id="callsToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-container">
+      <span>SMS</span>
+      <label class="toggle">
+        <input type="checkbox" id="smsToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-container">
+      <span>WhatsApp</span>
+      <label class="toggle">
+        <input type="checkbox" id="whatsappToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-container">
+      <span>Alarmes do Sistema</span>
+      <label class="toggle">
+        <input type="checkbox" id="systemToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Programação</h2>
+    <div class="schedule-container">
+      <div class="toggle-container">
+        <span>Modo Não Perturbe Automático</span>
+        <label class="toggle">
+          <input type="checkbox" id="scheduleToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="time-input">
+        <input type="time" id="startTime" value="22:00">
+        <span>até</span>
+        <input type="time" id="endTime" value="07:00">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Apps Bloqueados</h2>
+    <div class="app-list" id="blockedApps">
+      <!-- Apps serão inseridos via JavaScript -->
+    </div>
+  </div>
+</div>
+
+<script>
+// Simulação de apps bloqueados
+const apps = [
+  { name: 'WhatsApp', icon: '📱', status: true },
+  { name: 'Telefone', icon: '📞', status: true },
+  { name: 'SMS', icon: '✉️', status: true },
+  { name: 'Instagram', icon: '📷', status: false },
+  { name: 'Gmail', icon: '📧', status: true }
+];
+
+function updateBlockedApps() {
+  const appList = document.getElementById('blockedApps');
+  appList.innerHTML = '';
+  
+  apps.forEach(app => {
+    const appItem = document.createElement('div');
+    appItem.className = 'app-item';
+    appItem.innerHTML = `
+      <div class="app-icon">${app.icon}</div>
+      <div class="app-info">
+        <strong>${app.name}</strong>
+        <div>
+          <span class="status-indicator ${app.status ? 'status-active' : 'status-inactive'}"></span>
+          ${app.status ? 'Bloqueado' : 'Permitido'}
+        </div>
+      </div>
+    `;
+    appList.appendChild(appItem);
+  });
+}
+
+// Gerenciamento de estados dos toggles
+document.getElementById('masterToggle').addEventListener('change', function(e) {
+  const allToggles = document.querySelectorAll('.toggle input[type="checkbox"]');
+  allToggles.forEach(toggle => {
+    if (toggle !== this) {
+      toggle.checked = this.checked;
+    }
+  });
+  
+  if (this.checked) {
+    document.querySelector('.header').classList.add('blocking-active');
+  } else {
+    document.querySelector('.header').classList.remove('blocking-active');
+  }
+});
+
+// Simulação de notificações bloqueadas
+function updateBlockingStats() {
+  const stats = {
+    calls: Math.floor(Math.random() * 10),
+    sms: Math.floor(Math.random() * 20),
+    whatsapp: Math.floor(Math.random() * 50)
+  };
+  
+  return stats;
+}
+
+// Atualização periódica
+setInterval(() => {
+  const stats = updateBlockingStats();
+  updateBlockedApps();
+}, 5000);
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  updateBlockedApps();
+  
+  // Simulação de permissões do sistema
+  setTimeout(() => {
+    alert('⚠️ Para funcionar corretamente, o app precisa das seguintes permissões:\n\n- Acesso a notificações\n- Permissão para modificar configurações do sistema\n- Acesso a chamadas e SMS');
+  }, 1000);
+});
+
+// Gerenciamento do modo programado
+document.getElementById('scheduleToggle').addEventListener('change', function(e) {
+  const timeInputs = document.querySelectorAll('.time-input input');
+  timeInputs.forEach(input => {
+    input.disabled = !this.checked;
+  });
+});
+</script>
+</body></html>
